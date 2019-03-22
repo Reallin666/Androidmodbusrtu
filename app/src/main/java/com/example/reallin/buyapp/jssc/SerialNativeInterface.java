@@ -22,7 +22,7 @@
  * e-mail: scream3r.org@gmail.com
  * web-site: http://scream3r.org | http://code.google.com/p/java-simple-serial-connector/
  */
-package jssc;
+package com.example.reallin.buyapp.jssc;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -77,105 +77,108 @@ public class SerialNativeInterface {
     public static final String PROPERTY_JSSC_PARMRK = "JSSC_PARMRK";
 
     static {
-        String libFolderPath;
-        String libName;
+        // jimneylee add: load jssc library for android
+        System.loadLibrary("jssc");
 
-        String osName = System.getProperty("os.name");
-        String architecture = System.getProperty("os.arch");
-        String userHome = System.getProperty("user.home");
-        String fileSeparator = System.getProperty("file.separator");
-        String tmpFolder = System.getProperty("java.io.tmpdir");
-
-        //since 2.3.0 ->
-        String libRootFolder = new File(userHome).canWrite() ? userHome : tmpFolder;
-        //<- since 2.3.0
-
-        String javaLibPath = System.getProperty("java.library.path");//since 2.1.0
-
-        if(osName.equals("Linux")){
-            osName = "linux";
-            osType = OS_LINUX;
-        }
-        else if(osName.startsWith("Win")){
-            osName = "windows";
-            osType = OS_WINDOWS;
-        }//since 0.9.0 ->
-        else if(osName.equals("SunOS")){
-            osName = "solaris";
-            osType = OS_SOLARIS;
-        }
-        else if(osName.equals("Mac OS X") || osName.equals("Darwin")){//os.name "Darwin" since 2.6.0
-            osName = "mac_os_x";
-            osType = OS_MAC_OS_X;
-        }//<- since 0.9.0
-
-        if(architecture.equals("i386") || architecture.equals("i686")){
-            architecture = "x86";
-        }
-        else if(architecture.equals("amd64") || architecture.equals("universal")){//os.arch "universal" since 2.6.0
-            architecture = "x86_64";
-        }
-        else if(architecture.equals("arm")) {//since 2.1.0
-            String floatStr = "sf";
-            if(javaLibPath.toLowerCase().contains("gnueabihf") || javaLibPath.toLowerCase().contains("armhf")){
-                floatStr = "hf";
-            }
-            else {
-                try {
-                    Process readelfProcess =  Runtime.getRuntime().exec("readelf -A /proc/self/exe");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(readelfProcess.getInputStream()));
-                    String buffer = "";
-                    while((buffer = reader.readLine()) != null && !buffer.isEmpty()){
-                        if(buffer.toLowerCase().contains("Tag_ABI_VFP_args".toLowerCase())){
-                            floatStr = "hf";
-                            break;
-                        }
-                    }
-                    reader.close();
-                }
-                catch (Exception ex) {
-                    //Do nothing
-                }
-            }
-            architecture = "arm" + floatStr;
-        }
-        
-        libFolderPath = libRootFolder + fileSeparator + ".jssc" + fileSeparator + osName;
-        libName = "jSSC-" + libVersion + "_" + architecture;
-        libName = System.mapLibraryName(libName);
-
-        if(libName.endsWith(".dylib")){//Since 2.1.0 MacOSX 10.8 fix
-            libName = libName.replace(".dylib", ".jnilib");
-        }
-
-        boolean loadLib = false;
-
-        if(isLibFolderExist(libFolderPath)){
-            if(isLibFileExist(libFolderPath + fileSeparator + libName)){
-                loadLib = true;
-            }
-            else {
-                if(extractLib((libFolderPath + fileSeparator + libName), osName, libName)){
-                    loadLib = true;
-                }
-            }
-        }
-        else {
-            if(new File(libFolderPath).mkdirs()){
-                if(extractLib((libFolderPath + fileSeparator + libName), osName, libName)){
-                    loadLib = true;
-                }
-            }
-        }
-
-        if (loadLib) {
-            System.load(libFolderPath + fileSeparator + libName);
-            String versionBase = getLibraryBaseVersion();
-            String versionNative = getNativeLibraryVersion();
-            if (!versionBase.equals(versionNative)) {
-                System.err.println("Warning! jSSC Java and Native versions mismatch (Java: " + versionBase + ", Native: " + versionNative + ")");
-            }
-        }
+//        String libFolderPath;
+//        String libName;
+//
+//        String osName = System.getProperty("os.name");
+//        String architecture = System.getProperty("os.arch");
+//        String userHome = System.getProperty("user.home");
+//        String fileSeparator = System.getProperty("file.separator");
+//        String tmpFolder = System.getProperty("java.io.tmpdir");
+//
+//        //since 2.3.0 ->
+//        String libRootFolder = new File(userHome).canWrite() ? userHome : tmpFolder;
+//        //<- since 2.3.0
+//
+//        String javaLibPath = System.getProperty("java.library.path");//since 2.1.0
+//
+//        if(osName.equals("Linux")){
+//            osName = "linux";
+//            osType = OS_LINUX;
+//        }
+//        else if(osName.startsWith("Win")){
+//            osName = "windows";
+//            osType = OS_WINDOWS;
+//        }//since 0.9.0 ->
+//        else if(osName.equals("SunOS")){
+//            osName = "solaris";
+//            osType = OS_SOLARIS;
+//        }
+//        else if(osName.equals("Mac OS X") || osName.equals("Darwin")){//os.name "Darwin" since 2.6.0
+//            osName = "mac_os_x";
+//            osType = OS_MAC_OS_X;
+//        }//<- since 0.9.0
+//
+//        if(architecture.equals("i386") || architecture.equals("i686")){
+//            architecture = "x86";
+//        }
+//        else if(architecture.equals("amd64") || architecture.equals("universal")){//os.arch "universal" since 2.6.0
+//            architecture = "x86_64";
+//        }
+//        else if(architecture.equals("arm")) {//since 2.1.0
+//            String floatStr = "sf";
+//            if(javaLibPath.toLowerCase().contains("gnueabihf") || javaLibPath.toLowerCase().contains("armhf")){
+//                floatStr = "hf";
+//            }
+//            else {
+//                try {
+//                    Process readelfProcess =  Runtime.getRuntime().exec("readelf -A /proc/self/exe");
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(readelfProcess.getInputStream()));
+//                    String buffer = "";
+//                    while((buffer = reader.readLine()) != null && !buffer.isEmpty()){
+//                        if(buffer.toLowerCase().contains("Tag_ABI_VFP_args".toLowerCase())){
+//                            floatStr = "hf";
+//                            break;
+//                        }
+//                    }
+//                    reader.close();
+//                }
+//                catch (Exception ex) {
+//                    //Do nothing
+//                }
+//            }
+//            architecture = "arm" + floatStr;
+//        }
+//
+//        libFolderPath = libRootFolder + fileSeparator + ".jssc" + fileSeparator + osName;
+//        libName = "jSSC-" + libVersion + "_" + architecture;
+//        libName = System.mapLibraryName(libName);
+//
+//        if(libName.endsWith(".dylib")){//Since 2.1.0 MacOSX 10.8 fix
+//            libName = libName.replace(".dylib", ".jnilib");
+//        }
+//
+//        boolean loadLib = false;
+//
+//        if(isLibFolderExist(libFolderPath)){
+//            if(isLibFileExist(libFolderPath + fileSeparator + libName)){
+//                loadLib = true;
+//            }
+//            else {
+//                if(extractLib((libFolderPath + fileSeparator + libName), osName, libName)){
+//                    loadLib = true;
+//                }
+//            }
+//        }
+//        else {
+//            if(new File(libFolderPath).mkdirs()){
+//                if(extractLib((libFolderPath + fileSeparator + libName), osName, libName)){
+//                    loadLib = true;
+//                }
+//            }
+//        }
+//
+//        if (loadLib) {
+//            System.load(libFolderPath + fileSeparator + libName);
+//            String versionBase = getLibraryBaseVersion();
+//            String versionNative = getNativeLibraryVersion();
+//            if (!versionBase.equals(versionNative)) {
+//                System.err.println("Warning! jSSC Java and Native versions mismatch (Java: " + versionBase + ", Native: " + versionNative + ")");
+//            }
+//        }
     }
 
     /**
