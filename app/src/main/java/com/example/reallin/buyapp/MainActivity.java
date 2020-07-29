@@ -14,6 +14,9 @@ import com.invertor.modbus.serial.SerialPort;
 import com.invertor.modbus.serial.SerialPortFactoryJSSC;
 import com.invertor.modbus.serial.SerialUtils;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends Activity {
     public static ModbusMaster m;
 
@@ -21,6 +24,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 初始化 modbus 串口
+        initmod();
+
+        // 定时修改寄存器地址测试
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                write();
+            }
+        }, 1000, 1000);
     }
 
 
@@ -29,7 +44,7 @@ public class MainActivity extends Activity {
         SerialParameters sp = new SerialParameters();
         Modbus.setLogLevel(Modbus.LogLevel.LEVEL_DEBUG);
         try {
-            sp.setDevice("/dev/ttyS2");//设置端口
+            sp.setDevice("/dev/ttyMT1");//设置端口
             sp.setBaudRate(SerialPort.BaudRate.BAUD_RATE_9600);//波特率
             sp.setDataBits(8);
             sp.setParity(SerialPort.Parity.NONE);
@@ -61,10 +76,12 @@ public class MainActivity extends Activity {
 
     }
 
+    static int sRegisterValue = 0;
     protected void write() {//写寄存器
 
         try {
-            m.writeSingleRegister(2, 1101, 1);
+            sRegisterValue = sRegisterValue + 1;
+            m.writeSingleRegister(2, 1101, sRegisterValue);
         } catch (ModbusProtocolException e) {
             e.printStackTrace();
         } catch (ModbusNumberException e) {
